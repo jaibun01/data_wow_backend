@@ -38,12 +38,10 @@ export class UsersService {
       if (userSystem && userSystem.username === createUserDto.username) {
         throw new BadRequestException('User already exists');
       }
-      const saltOrRounds = 10;
-      const password = process.env.RANDOM_PASSWORD;
-      const hash = await bcrypt.hash(password, saltOrRounds);
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
       const user = new this.userModel({
         username: createUserDto.username,
-        password: hash,
+        password: hashedPassword,
       });
       user.save();
       return user;
