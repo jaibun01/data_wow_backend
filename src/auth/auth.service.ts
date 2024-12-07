@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { UsersService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from '../user/user.service';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,10 +26,10 @@ export class AuthService {
     pass: string,
   ): Promise<{ access_token: string }> {
     const user = await this.usersService.findOne(username);
-    console.log('pass', pass);
+    // console.log('pass', pass);
     // const isMatch = await bcrypt.compare(pass, user.password);
     const validate = await this.validateUser(user.username, pass);
-    console.log('validate', validate);
+    // console.log('validate', validate);
     // console.log('isMatch', isMatch);
 
     if (!validate) {
