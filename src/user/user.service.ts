@@ -27,7 +27,6 @@ export class UsersService {
   async findOne(username: string): Promise<Users | undefined> {
     return await this.userModel
       .findOne({ username: username })
-      .lean()
       .select('_id username password');
   }
   async create(createUserDto: CreateUserDto) {

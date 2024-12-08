@@ -28,6 +28,9 @@ export class AuthService {
     const user = await this.usersService.findOne(username);
     // console.log('pass', pass);
     // const isMatch = await bcrypt.compare(pass, user.password);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
     const validate = await this.validateUser(user.username, pass);
     // console.log('validate', validate);
     // console.log('isMatch', isMatch);
