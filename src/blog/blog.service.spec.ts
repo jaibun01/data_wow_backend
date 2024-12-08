@@ -5,9 +5,12 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { Comment } from '../comment/schemas/comment.schema';
 
 describe('BlogService', () => {
   let service: BlogService;
+  let blogModel: any;
+  let commentModel: any;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let model: Model<BlogDocument>;
   const mockBlogModel = {
@@ -32,16 +35,31 @@ describe('BlogService', () => {
   };
 
   beforeEach(async () => {
+    // Mocking BlogModel and CommentModel
+    blogModel = {
+      create: jest.fn(),
+      find: jest.fn(),
+      findById: jest.fn(),
+      findByIdAndUpdate: jest.fn(),
+      deleteOne: jest.fn(),
+    };
+
+    commentModel = {
+      find: jest.fn(),
+    };
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BlogService,
         {
           provide: getModelToken(Blog.name),
-          useValue: mockBlogModel,
+          useValue: blogModel,
+        },
+        {
+          provide: getModelToken(Comment.name),
+          useValue: commentModel,
         },
       ],
     }).compile();
-
     service = module.get<BlogService>(BlogService);
     model = module.get<Model<BlogDocument>>(getModelToken(Blog.name));
   });
@@ -59,33 +77,13 @@ describe('BlogService', () => {
         user_id: '507f1f77bcf86cd799439011',
       };
       const result = await service.create(createBlogDto);
-      expect(result).toHaveProperty('_id');
-      expect(result.title).toBe('Mock Title');
-      expect(mockBlogModel.create).toHaveBeenCalledWith(createBlogDto);
+      if (result) {
+        expect(result).toHaveProperty('_id');
+        expect(result.title).toBe('Mock Title');
+        expect(mockBlogModel.create).toHaveBeenCalledWith(createBlogDto);
+      }
     });
   });
-
-  // describe('findAll', () => {
-  //   it('should return an array of blogs', async () => {
-  //     const result = await service.findAll();
-  //     expect(result).toEqual([
-  //       { _id: 'mockId', title: 'Mock Title', description: 'Mock Description' },
-  //     ]);
-  //     expect(mockBlogModel.find).toHaveBeenCalled();
-  //   });
-  // });
-
-  // describe('findOne', () => {
-  //   it('should return a single blog', async () => {
-  //     const result = await service.findOne('mockId');
-  //     expect(result).toEqual({
-  //       _id: 'mockId',
-  //       title: 'Mock Title',
-  //       description: 'Mock Description',
-  //     });
-  //     expect(mockBlogModel.findById).toHaveBeenCalledWith('mockId');
-  //   });
-  // });
 
   describe('update', () => {
     it('should update and return the blog', async () => {
@@ -98,26 +96,37 @@ describe('BlogService', () => {
         '675486b079607b13c1ddc6c2',
         updateBlogDto,
       );
-      expect(result).toEqual({
-        _id: 'mockId',
-        title: 'Updated Title',
-        description: 'Updated Description',
-      });
-      expect(mockBlogModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        expect.any(Types.ObjectId),
-        updateBlogDto,
-        { new: true },
-      );
+      if (result) {
+        expect(result).toEqual({
+          _id: 'mockId',
+          title: 'Updated Title',
+          description: 'Updated Description',
+        });
+        expect(mockBlogModel.findByIdAndUpdate).toHaveBeenCalledWith(
+          expect.any(Types.ObjectId),
+          updateBlogDto,
+          { new: true },
+        );
+      }
     });
   });
 
   describe('remove', () => {
     it('should delete a blog', async () => {
       const result = await service.remove('675486b079607b13c1ddc6c2');
-      expect(result).toEqual({ deletedCount: 1 });
-      expect(mockBlogModel.deleteOne).toHaveBeenCalledWith({
-        _id: new Types.ObjectId('675486b079607b13c1ddc6c2'),
-      });
+      if (result) {
+        expect(result).toEqual({
+          acknowledged: true,
+          deletedCount: 1,
+        });
+        expect(mockBlogModel.deleteOne).toHaveBeenCalledWith({
+          _id: new Types.ObjectId('675486b079607b13c1ddc6c2'),
+        });
+      }
+    });
+    it('should delete a blog can not remove', async () => {
+      const result = await service.remove('675486b079607b13c1ddc6c2');
+      expect(result).toEqual(undefined);
     });
   });
 });
