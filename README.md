@@ -29,10 +29,16 @@
 ## Project setup
 
 ```bash
+
+# Database 
+MongoDB
+
 # .env
 PORT=
 MONGO_URL=
 JWT_SECRET=
+
+$ npm install
 
 # Call api create user collection before login (One time)
 METHOD POST => endpoint_backend/users/register
@@ -44,7 +50,6 @@ BODY {
 # Call api create community collection before create blog (One time)
 METHOD POST => endpoint_backend/community
 
-$ npm install
 ```
 
 ## Compile and run the project
